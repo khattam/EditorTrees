@@ -1,11 +1,19 @@
 package editortrees;
 
+import java.util.ArrayList;
+
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
+import editortrees.Node.Code;
+import editortrees.Node.NodeContainer;
 /**
  * A height-balanced binary tree with rank that could be the basis for a text
  * editor.
  * 
- * @author <<add name here>>
- * @author <<add name here>>
+ * @author Medhansh Khattar
  * TODO: Acknowledge anyone else you got help
  *         from here, along with the help they provided:
  * 
@@ -14,24 +22,31 @@ package editortrees;
  */
 public class EditTree {
 
+	private static final Node NULL_NODE = null;
 	Node root;
 	private int size;
+	public static int totalRotations;
+	private DisplayableBinaryTree display;
 
 	/**
 	 * MILESTONE 1 Construct an empty tree
 	 */
-	public EditTree() {
-
-	}
+	 public EditTree() {
+	        root = null;
+	        size = 0;
+	        this.totalRotations=0;
+	    }
 
 	/**
 	 * MILESTONE 1 Construct a single-node tree whose element is ch
 	 * 
 	 * @param ch
 	 */
-	public EditTree(char ch) {
-
-	}
+	 public EditTree(char ch) {
+	        this.root = new Node(ch);
+	        this.size = 1;
+	        this.totalRotations=0;
+	    }
 
 	/**
 	 * MILESTONE 2 Make this tree be a copy of e, with all new nodes, but the same
@@ -40,8 +55,20 @@ public class EditTree {
 	 * 
 	 * @param e
 	 */
-	public EditTree(EditTree e) {
-
+	 public EditTree(EditTree e) {
+		 this.root = this.copyTrees(e.root);
+		 this.totalRotations = 0; // rotations never occur when copying a tree
+	 }
+	
+	private Node copyTrees(Node nodeToCopy) {
+		if(nodeToCopy == Node.NULL_NODE || nodeToCopy == null) {
+			return nodeToCopy;
+		} 
+		Node copy = new Node(nodeToCopy.data, nodeToCopy.rank, nodeToCopy.balance);
+		this.size++;
+		copy.left = copyTrees(nodeToCopy.left);
+		copy.right = copyTrees(nodeToCopy.right);
+		return copy;
 	}
 
 	/**
@@ -52,7 +79,31 @@ public class EditTree {
 	 * @param s
 	 */
 	public EditTree(String s) {
+		if(s.length() == 0) {
+			this.root = NULL_NODE;
+		}
+		this.root = createTreeFromString(s, s.length() / 2);
+	}
 
+	private Node createTreeFromString(String s, int stringIndex) {
+		if(this.invalidIndex(s, stringIndex)) {
+			return NULL_NODE;
+		}
+		Node newNode = new Node(s.charAt(stringIndex));
+		this.add(newNode.data);
+		newNode.left = this.createTreeFromString(s, stringIndex - 1);
+		if(stringIndex == 0 || stringIndex == s.length() - 1) {
+			return newNode;
+		}
+		if(newNode.left != NULL_NODE) {
+			newNode.rank++;
+		}
+		newNode.right = this.createTreeFromString(s, stringIndex + 1);
+		return newNode;
+	}
+
+	private boolean invalidIndex(String s, int stringIndex) {
+		return stringIndex < 0 || stringIndex >= s.length();
 	}
 
 	/**
@@ -60,8 +111,19 @@ public class EditTree {
 	 */
 	@Override
 	public String toString() {
-		return "@"; // replace with a real calculation.
+		if(this.size == 0) {
+			return "";
+		}
+//		return toStringHelper(this.root);
+		return this.root.toStringHelper();
 	}
+
+//	private String toStringHelper(Node node) {
+//		if(node == Node.NULL_NODE || node == null) {
+//			return "";
+//		}
+//		return toStringHelper(node.left) + String.valueOf(node.data) + toStringHelper(node.right);
+//	}
 
 	/**
 	 * MILESTONE 1 Just modify the value of this.size whenever adding or removing a
@@ -80,16 +142,14 @@ public class EditTree {
 	 * @param ch character to add to the end of this tree.
 	 */
 	public void add(char ch) {
-		// Notes:
-		// 1. Please document chunks of code as you go. Why are you doing what
-		// you are doing? Comments written after the code is finalized tend to
-		// be useless, since they just say WHAT the code does, line by line,
-		// rather than WHY the code was written like that. Six months from now,
-		// it's the reasoning behind doing what you did that will be valuable to
-		// you!
-		// 2. Unit tests are cumulative, and many things are based on add(), so
-		// make sure that you get this one correct.
-
+		if(this.size == 0) { // adding to an empty tree.
+			this.root = new Node(ch); // simply make the root have the value ch
+			this.root.balance = Code.SAME;
+		} else {
+			NodeContainer nc = new NodeContainer();
+			root = root.addSimple(ch, nc);
+		} // calls recursive method that recurses to the end of the tree
+		this.size++;
 	}
 
 	/**
@@ -105,8 +165,17 @@ public class EditTree {
 	 */
 	public void add(char ch, int pos) throws IndexOutOfBoundsException {
 		// You can use your O(1) size field/method to determine if the index is valid.
-
-	}
+		if(pos < 0 || pos > this.size) { // checks for a valid index
+			throw new IndexOutOfBoundsException();
+		} else if(this.root == null) { // checks if we are adding to an empty tree
+			this.root = new Node(ch);
+			this.root.balance = Code.SAME;
+		} else { // calls recursive Node helper method
+			NodeContainer nc = new NodeContainer();
+			root = root.add(ch, pos, nc);
+		}
+		this.size++;
+	} // commit
 
 	/**
 	 * MILESTONE 1 This one asks for more info from each node. You can write it
@@ -119,11 +188,19 @@ public class EditTree {
 	 * are many more examples in the unit tests.
 	 * 
 	 * @return The string of elements and ranks, given in an PRE-ORDER traversal of
-	 *         the tree.
+	 *         the tree
 	 */
 	public String toRankString() {
-		return ""; // replace by a real calculation.
+		return toArrayList().toString();
 	}
+
+	private ArrayList<String> toArrayList() {
+		ArrayList<String> rankArrayList = new ArrayList<String>();
+		root.rankArrayListHelper(rankArrayList);
+		return rankArrayList;
+	}
+	
+	
 
 	/**
 	 * MILESTONE 1
@@ -137,7 +214,13 @@ public class EditTree {
 	 *                                   field/method to determine this.
 	 */
 	public char get(int pos) throws IndexOutOfBoundsException {
-		return '%'; // replace by a real O(log n) calculation.
+		if(!(pos >= 0 && pos <= this.size - 1) || this.size == 0) {
+			throw new IndexOutOfBoundsException();
+		}
+		if(this.root == Node.NULL_NODE) {
+			return '\0';
+		}
+		return this.root.getHelper(pos);
 	}
 
 	// MILESTONE 1: They next two "slow" methods are useful for testing, debugging 
@@ -146,6 +229,9 @@ public class EditTree {
 	// are providing them for you.
 	// Please do not modify them or their recursive helpers in the Node class.
 	public int slowHeight() {
+		if(this.root == NULL_NODE) {
+			return -1;
+		}
 		return root.slowHeight();
 	}
 
@@ -177,10 +263,26 @@ public class EditTree {
 	 * 
 	 * @return True iff each node's rank correctly equals its left subtree's size.
 	 */
+	/**
+	 * Returns true iff for every node in the tree, the node's rank equals the size
+	 * of the left subtree.
+	 * 
+	 * @return True iff each node's rank correctly equals its left subtree's size.
+	 */
 	public boolean ranksMatchLeftSubtreeSize() {
-		return false; // replace by a real calculation.
+		BooleanContainer bc = new BooleanContainer(true);
+		root.checkRanks(bc);
+		return bc.check;
 	}
 
+	class BooleanContainer {
+		public boolean check;
+		
+		public BooleanContainer(boolean value) {
+			this.check = value;
+		}
+	}
+	
 	/**
 	 * MILESTONE 2 Similar to toRankString(), but adding in balance codes too.
 	 * 
@@ -190,8 +292,18 @@ public class EditTree {
 	 * @return The string of elements and ranks, given in an pre-order traversal of
 	 *         the tree.
 	 */
+	
 	public String toDebugString() {
-		return ""; // replace by a real calculation.
+		if(this.root == Node.NULL_NODE || this.root == null) {
+			return "[]";
+		}
+		return toArrayListDebug().toString();
+	}
+
+	private ArrayList<String> toArrayListDebug() {
+		ArrayList<String> debugArrayList = new ArrayList<String>();
+		root.rankArrayListDebugHelper(debugArrayList);
+		return debugArrayList;
 	}
 
 	/**
@@ -201,7 +313,7 @@ public class EditTree {
 	 * @return number of rotations since this tree was created.
 	 */
 	public int totalRotationCount() {
-		return -1; // replace by a real calculation.
+		return this.totalRotations;
 	}
 
 	/**
@@ -221,7 +333,9 @@ public class EditTree {
 	 * @return True iff each node's balance code is correct.
 	 */
 	public boolean balanceCodesAreCorrect() {
-		return false; // replace by a real calculation.
+		BooleanContainer bc = new BooleanContainer(true);
+		root.checkBalance(bc);
+		return bc.check;
 	}
 
 	/**
@@ -231,9 +345,20 @@ public class EditTree {
 	 * 
 	 * @return the height of this tree
 	 */
-	public int fastHeight() {
-		return -2; // replace by a real calculation.
+	public int fastHeight() 
+	{
+//	    return fastHeightHelper(root);
+		return this.root.fastHeightHelper();
 	}
+
+//	private int fastHeightHelper(Node node) {
+//	    if (node == null) {
+//	        return -1;
+//	    }
+//	    int leftHeight = fastHeightHelper(node.left);
+//	    int rightHeight = fastHeightHelper(node.right);
+//	    return Math.max(leftHeight, rightHeight) + 1;
+//	}
 
 	/**
 	 * MILESTONE 3
@@ -248,7 +373,21 @@ public class EditTree {
 		// node to be deleted with either its in-order successor or predecessor.
 		// The tests assume assume that you will replace it with the
 		// *successor*.
-		return '%'; // replace by a real calculation.
+		if(!(pos >= 0 && pos <= this.size - 1) || this.size == 0) {
+			throw new IndexOutOfBoundsException();
+		} else if(this.root == Node.NULL_NODE) {
+			return '\0';
+		}
+		NodeContainer nc = new NodeContainer();
+		this.root = this.root.deleteHelper(pos, nc);
+//		Code checkOtherSubtree = nc.traversalDirection.getOppositeCode();
+//		if(checkOtherSubtree.equals(Code.LEFT)) {
+//			this.root.left = this.root.left.deleteHelper(-1, nc); // purpose of using -1 as pos is to indicate that we are checking the subtree where deletion did not occur
+//		}
+		
+//		this.root = this.root.checkOtherSubtreeHelper(nc);
+		this.size--;
+		return nc.dataToReturn;
 	}
 
 	/**
@@ -263,11 +402,29 @@ public class EditTree {
 	 * @throws IndexOutOfBoundsException unless both pos and pos+length-1 are
 	 *                                   legitimate indexes within this tree.
 	 */
+	
+	
+
 	public String get(int pos, int length) throws IndexOutOfBoundsException {
-		return ""; // replace by a real calculation.
+		if(pos < 0 || length < 0 || pos + length > this.size()) {
+			throw new IndexOutOfBoundsException();
+		}
+		StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < length; i++) {
+			builder.append(this.get(i + pos));
+		}
+		return builder.toString();
 	}
 
 	// Feel free to add whatever other methods and helpers you need,
 	// like for the graphical debugger.
-
+	
+	public void show() {
+		if (this.display == null) {
+			this.display = new DisplayableBinaryTree(this, 960, 1080, true);
+		} else {
+			this.display.show(true);
+		}
+	}
+	
 }
