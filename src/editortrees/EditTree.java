@@ -118,12 +118,12 @@ public class EditTree {
 		return this.root.toStringHelper();
 	}
 
-//	private String toStringHelper(Node node) {
-//		if(node == Node.NULL_NODE || node == null) {
-//			return "";
-//		}
-//		return toStringHelper(node.left) + String.valueOf(node.data) + toStringHelper(node.right);
-//	}
+	private String toStringHelper(Node node) {
+		if(node == Node.NULL_NODE || node == null) {
+			return "";
+		}
+		return toStringHelper(node.left) + String.valueOf(node.data) + toStringHelper(node.right);
+	}
 
 	/**
 	 * MILESTONE 1 Just modify the value of this.size whenever adding or removing a
@@ -347,18 +347,11 @@ public class EditTree {
 	 */
 	public int fastHeight() 
 	{
-//	    return fastHeightHelper(root);
+//	   
 		return this.root.fastHeightHelper();
 	}
 
-//	private int fastHeightHelper(Node node) {
-//	    if (node == null) {
-//	        return -1;
-//	    }
-//	    int leftHeight = fastHeightHelper(node.left);
-//	    int rightHeight = fastHeightHelper(node.right);
-//	    return Math.max(leftHeight, rightHeight) + 1;
-//	}
+
 
 	/**
 	 * MILESTONE 3
@@ -380,12 +373,6 @@ public class EditTree {
 		}
 		NodeContainer nc = new NodeContainer();
 		this.root = this.root.deleteHelper(pos, nc);
-//		Code checkOtherSubtree = nc.traversalDirection.getOppositeCode();
-//		if(checkOtherSubtree.equals(Code.LEFT)) {
-//			this.root.left = this.root.left.deleteHelper(-1, nc); // purpose of using -1 as pos is to indicate that we are checking the subtree where deletion did not occur
-//		}
-		
-//		this.root = this.root.checkOtherSubtreeHelper(nc);
 		this.size--;
 		return nc.dataToReturn;
 	}
@@ -421,7 +408,7 @@ public class EditTree {
 	
 	public void show() {
 		if (this.display == null) {
-			this.display = new DisplayableBinaryTree(this, 960, 1080, true);
+			this.display = new DisplayableBinaryTree(this, 1080, 1080, true);
 		} else {
 			this.display.show(true);
 		}

@@ -49,7 +49,7 @@ public class Node {
 
 	char data;
 	Node left, right; // subtrees
-	int rank; // inorder position of this node within its own subtree.
+	int rank; // i see this as the inorder position of this node within its own subtree.
 	Code balance;
 	DisplayableNodeWrapper displayableNodeWrapper;
 	
@@ -81,7 +81,7 @@ public class Node {
 	}
 
 	public Node(char data) {
-		// Make a leaf
+		// Make a leaf node
 		this(data, NULL_NODE, NULL_NODE);
 		this.balance = Code.SAME;
 		displayableNodeWrapper = new DisplayableNodeWrapper(this);
@@ -157,6 +157,11 @@ public class Node {
 	// its helpers, the others were less than 10 lines long. Well-named helper
 	// methods are more effective than comments in writing clean code
 	public Node addSimple(char ch, NodeContainer nc) {
+		if(nc == null)
+		{
+			return NULL_NODE;
+		}
+		
 		if(this == NULL_NODE) {
 			Node newNode = new Node(ch);
 			newNode.balance = Code.SAME;
