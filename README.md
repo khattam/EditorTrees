@@ -4,6 +4,22 @@
 Author: Medhansh Khattar  
 Class: CSSE230: Data Structures and Algorithms at Rose-Hulman Institute of Technology
 
+## Table of Contents
+- [Introduction](#introduction)
+- [Features](#features)
+- [Technical Design](#technical-design)
+- [Node Structure](#node-structure)
+- [Operations](#operations)
+  - [Insertion](#insertion)
+  - [Deletion](#deletion)
+  - [Text Replacement](#text-replacement)
+  - [Undo/Redo](#undo-redo)
+  - [Text Search](#text-search)
+  - [Balancing](#balancing)
+- [Use Cases](#use-cases)
+- [Advanced Topics](#advanced-topics)
+- [Future Enhancements](#future-enhancements)
+
 ## Introduction
 The Editor Tree is an advanced data structure designed to optimize the management and editing of text content. Built on the foundation of an AVL Tree, the Editor Tree allows for the efficient execution of dynamic text editing operations, including insertions, deletions, and modifications, while maintaining strict balance to ensure optimal performance.
 
